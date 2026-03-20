@@ -3,19 +3,28 @@
 
 SetCapsLockState "AlwaysOff"
 
+; # 配置信息
+global APP_VERSION := "__APP_VERSION__" ; 版本号会在编译时自动替换
+global SCRIPT_ENABLED := true
+
 global TOAST_HOLD_MS := 640
 global TOAST_FADE_INTERVAL_MS := 20
 global TOAST_FADE_STEP := 20
 global TOAST_RADIUS := 24
-global APP_VERSION := "__APP_VERSION__"
-global SCRIPT_ENABLED := true
+global TOAST_FONT := "Microsoft YaHei UI"
+global TOAST_OPACITY := 0.9
+global IME_MODE_BACK_COLOR := Map(
+    "中文", "fb0931",
+    "English", "303030",
+    "未知", "292727",
+)
 
-global ToastAlpha := 200
+global ToastAlpha := 255 * TOAST_OPACITY
 global ToastGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20")
 ToastGui.BackColor := "2f3239"
 ToastGui.MarginX := 28
 ToastGui.MarginY := 14
-ToastGui.SetFont("s20 cFFFFFF bold", "Microsoft YaHei UI")
+ToastGui.SetFont("s20 cFFFFFF bold", TOAST_FONT)
 global ToastText := ToastGui.AddText("Center w130", "")
 
 InitializeTrayMenu()
@@ -59,7 +68,7 @@ UpdateStartupMenuItem() {
 }
 
 ToggleScriptEnabled(*) {
-    global SCRIPT_ENABLED
+    global ToastGui, SCRIPT_ENABLED
 
     previousLabel := GetToggleMenuLabel()
     SCRIPT_ENABLED := !SCRIPT_ENABLED
@@ -113,19 +122,25 @@ GetStartupShortcutPath() {
 
 ; # 真正的检测中英文和切换模式的逻辑
 ToggleIme(*) {
-    if (IsChineseLayout()) {
-        SendInput "^{Space}"
-        ShowToast(ReadImeModeAfterDelay())
+    if (!IsChineseLayout()) {
+        return
     }
+
+    SendInput "^{Space}"
+    imeMode := ReadImeModeAfterDelay(60)
+    ShowToast(imeMode)
 }
 
 SyncImeState(*) {
-    if (IsChineseLayout()) {
-        ShowToast(ReadImeModeAfterDelay(0))
+    if (!IsChineseLayout()) {
+        return
     }
+
+    imeMode := ReadImeModeAfterDelay(0)
+    ShowToast(imeMode)
 }
 
-ReadImeModeAfterDelay(delayMs := 120) {
+ReadImeModeAfterDelay(delayMs) {
     if (delayMs > 0) {
         Sleep delayMs
     }
@@ -142,6 +157,8 @@ ReadImeModeAfterDelay(delayMs := 120) {
 }
 
 GetImeMode() {
+    global ToastGui
+
     hwnd := GetImeTargetHwnd()
     if !hwnd {
         ToastGui.BackColor := "292727"
@@ -232,7 +249,7 @@ IsChineseConversionMode(conversionMode) {
 }
 
 ShowToast(text) {
-    global ToastGui, ToastText, ToastAlpha, TOAST_HOLD_MS
+    global ToastGui, ToastText, ToastAlpha, TOAST_HOLD_MS, TOAST_OPACITY, IME_MODE_BACK_COLOR
 
     if (text = "") {
         text := "未知"
@@ -241,9 +258,10 @@ ShowToast(text) {
     SetTimer FadeToast, 0
     SetTimer StartFade, 0
 
-    ToastAlpha := 200
+    ToastAlpha := 255 * TOAST_OPACITY
     ToastText.Value := text
 
+    ToastGui.BackColor := IME_MODE_BACK_COLOR[text] ? IME_MODE_BACK_COLOR[text] : IME_MODE_BACK_COLOR["未知"]
     ToastGui.Show("AutoSize Hide")
     ToastGui.GetPos(, , &w, &h)
     x := Floor((A_ScreenWidth - w) / 2)
