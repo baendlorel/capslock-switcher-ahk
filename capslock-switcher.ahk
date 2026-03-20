@@ -61,10 +61,10 @@ GetImeMode() {
     }
 
     if (IsChineseConversionMode(conversionMode)) {
-        ToastGui.BackColor := "b50808"
+        ToastGui.BackColor := "a30923"
         return "中文"
     } else {
-        ToastGui.BackColor := "460087"
+        ToastGui.BackColor := "303030"
         return "English"
     }
 
