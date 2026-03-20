@@ -12,14 +12,14 @@ global TOAST_FADE_INTERVAL_MS := 20
 global TOAST_FADE_STEP := 20
 global TOAST_RADIUS := 24
 global TOAST_FONT := "Microsoft YaHei UI"
-global TOAST_OPACITY := 0.9
+global TOAST_MAX_ALPHA := 225
 global IME_MODE_BACK_COLOR := Map(
     "中文", "fb0931",
     "English", "303030",
     "未知", "292727",
 )
 
-global ToastAlpha := 255 * TOAST_OPACITY
+global ToastAlpha := TOAST_MAX_ALPHA ; todo 这里要加入前n秒保持在这里不变的逻辑
 global ToastGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20")
 ToastGui.BackColor := "2f3239"
 ToastGui.MarginX := 28
@@ -27,26 +27,38 @@ ToastGui.MarginY := 14
 ToastGui.SetFont("s20 cFFFFFF bold", TOAST_FONT)
 global ToastText := ToastGui.AddText("Center w130", "")
 
-InitializeTrayMenu()
+Initialize()
 
 CapsLock:: ToggleIme()
-+CapsLock:: SyncImeState()
++CapsLock:: ShowImeState()
 
-; # 托盘右键菜单
-InitializeTrayMenu() {
+Initialize() {
     global APP_VERSION
 
     A_TrayMenu.Delete()
-    A_TrayMenu.Add(APP_VERSION, DoNothing)
+    A_TrayMenu.Add("版本" APP_VERSION, DoNothing)
     A_TrayMenu.Disable(APP_VERSION)
     A_TrayMenu.Add("开机启动", ToggleStartup)
     UpdateStartupMenuItem()
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
     A_TrayMenu.Add()
+    A_TrayMenu.Add("关于", About)
+    A_TrayMenu.Add()
     A_TrayMenu.Add("退出", (*) => ExitApp())
+
+    ShowToast("CapsLock Switcher " APP_VERSION " 启动")
 }
 
+; # 托盘右键菜单相关
 DoNothing(*) {
+}
+
+About(*) {
+    MsgBox(
+        "CapsLock Switcher " APP_VERSION "`n" .
+        "基于 AutoHotkey 开发的输入法切换工具`n`n" .
+        "作者：Kasukabe Tsumugi`n" .
+        "项目地址: https://github.com/baendlorel/capslock-switcher-ahk")
 }
 
 ToggleStartup(*) {
@@ -131,7 +143,7 @@ ToggleIme(*) {
     ShowToast(imeMode)
 }
 
-SyncImeState(*) {
+ShowImeState(*) {
     if (!IsChineseLayout()) {
         return
     }
@@ -248,8 +260,8 @@ IsChineseConversionMode(conversionMode) {
     return (conversionMode & IME_CMODE_NATIVE) != 0
 }
 
-ShowToast(text) {
-    global ToastGui, ToastText, ToastAlpha, TOAST_HOLD_MS, TOAST_OPACITY, IME_MODE_BACK_COLOR
+ShowToast(text, holdMs := TOAST_HOLD_MS) {
+    global ToastGui, ToastText, ToastAlpha, TOAST_HOLD_MS, TOAST_MAX_ALPHA, IME_MODE_BACK_COLOR
 
     if (text = "") {
         text := "未知"
@@ -258,7 +270,7 @@ ShowToast(text) {
     SetTimer FadeToast, 0
     SetTimer StartFade, 0
 
-    ToastAlpha := 255 * TOAST_OPACITY
+    ToastAlpha := 255 * TOAST_MAX_ALPHA
     ToastText.Value := text
 
     ToastGui.BackColor := IME_MODE_BACK_COLOR[text] ? IME_MODE_BACK_COLOR[text] : IME_MODE_BACK_COLOR["未知"]
@@ -276,7 +288,7 @@ ShowToast(text) {
 
     }
 
-    SetTimer StartFade, -TOAST_HOLD_MS
+    SetTimer StartFade, -holdMs
 }
 
 StartFade(*) {
