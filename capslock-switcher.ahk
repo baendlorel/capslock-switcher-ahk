@@ -7,6 +7,8 @@ global TOAST_HOLD_MS := 640
 global TOAST_FADE_INTERVAL_MS := 20
 global TOAST_FADE_STEP := 20
 global TOAST_RADIUS := 24
+global APP_VERSION := "__APP_VERSION__"
+global SCRIPT_ENABLED := true
 
 global ToastAlpha := 200
 global ToastGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20")
@@ -16,9 +18,99 @@ ToastGui.MarginY := 14
 ToastGui.SetFont("s20 cFFFFFF bold", "Microsoft YaHei UI")
 global ToastText := ToastGui.AddText("Center w130", "")
 
+InitializeTrayMenu()
+
 CapsLock:: ToggleIme()
 +CapsLock:: SyncImeState()
 
+; # 托盘右键菜单
+InitializeTrayMenu() {
+    global APP_VERSION
+
+    A_TrayMenu.Delete()
+    A_TrayMenu.Add(APP_VERSION, DoNothing)
+    A_TrayMenu.Disable(APP_VERSION)
+    A_TrayMenu.Add("开机启动", ToggleStartup)
+    UpdateStartupMenuItem()
+    A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
+    A_TrayMenu.Add()
+    A_TrayMenu.Add("退出", (*) => ExitApp())
+}
+
+DoNothing(*) {
+}
+
+ToggleStartup(*) {
+    if (IsStartupEnabled()) {
+        RemoveStartupShortcut()
+    } else {
+        CreateStartupShortcut()
+    }
+
+    UpdateStartupMenuItem()
+}
+
+UpdateStartupMenuItem() {
+    if (IsStartupEnabled()) {
+        A_TrayMenu.Check("开机启动")
+    } else {
+        A_TrayMenu.Uncheck("开机启动")
+    }
+}
+
+ToggleScriptEnabled(*) {
+    global SCRIPT_ENABLED
+
+    previousLabel := GetToggleMenuLabel()
+    SCRIPT_ENABLED := !SCRIPT_ENABLED
+    Suspend(SCRIPT_ENABLED ? 0 : 1)
+    A_TrayMenu.Rename(previousLabel, GetToggleMenuLabel())
+    ShowToast(SCRIPT_ENABLED ? "已开启" : "已关闭")
+}
+
+GetToggleMenuLabel() {
+    global SCRIPT_ENABLED
+    return SCRIPT_ENABLED ? "暂时关闭" : "开启"
+}
+
+IsStartupEnabled() {
+    return FileExist(GetStartupShortcutPath()) != ""
+}
+
+CreateStartupShortcut() {
+    startupShortcutPath := GetStartupShortcutPath()
+    if FileExist(startupShortcutPath) {
+        FileDelete(startupShortcutPath)
+    }
+
+    if (A_IsCompiled) {
+        FileCreateShortcut(A_ScriptFullPath, startupShortcutPath, A_ScriptDir, , "CapsLock Switcher")
+        return
+    }
+
+    FileCreateShortcut(
+        A_AhkPath,
+        startupShortcutPath,
+        A_ScriptDir,
+        '"' A_ScriptFullPath '"',
+        "CapsLock Switcher",
+        A_AhkPath
+    )
+}
+
+RemoveStartupShortcut() {
+    startupShortcutPath := GetStartupShortcutPath()
+    if FileExist(startupShortcutPath) {
+        FileDelete(startupShortcutPath)
+    }
+}
+
+GetStartupShortcutPath() {
+    scriptBaseName := RegExReplace(A_ScriptName, "\.[^.]+$", "")
+    return A_Startup "\\" scriptBaseName ".lnk"
+}
+
+; # 真正的检测中英文和切换模式的逻辑
 ToggleIme(*) {
     if (IsChineseLayout()) {
         SendInput "^{Space}"

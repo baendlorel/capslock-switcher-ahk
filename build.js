@@ -63,19 +63,31 @@ function getAhk() {
   if (!ahk) {
     fs.writeFileSync(
       ahkPath,
-      '[Compiler Path Not Found] Please put the absolute path to ...\\AutoHotkey\\Compiler\\Ahk2Exe.exe here',
+      '[Compiler Path Not Found] 请将AutoHotKey的编译器的绝对地址写在本文件中。 ...\\AutoHotkey\\Compiler\\Ahk2Exe.exe here',
     );
   }
 
   return ahk;
 }
 
+function toggleVersionPlaceholder(src, version, state) {
+  if (state === 'on') {
+    const replaced = fs.readFileSync(src, 'utf-8').replace('__APP_VERSION__', version);
+    fs.writeFileSync(src, replaced);
+  } else {
+    const original = fs.readFileSync(src, 'utf-8').replace(version, '__APP_VERSION__');
+    fs.writeFileSync(src, original);
+  }
+}
+
 function build() {
   const ahk = getAhk();
-  const pkgJson = JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8'));
+  const version = 'v' + JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8')).version;
   const source = path.resolve('capslock-switcher.ahk');
-  const exe = path.resolve(`capslock-switcher-v${pkgJson.version}.exe`);
+  const exe = path.resolve(`capslock-switcher-${version}.exe`);
+  toggleVersionPlaceholder(source, version, 'on');
   execSync(`"${ahk}" /in "${source}" /out "${exe}"`);
+  toggleVersionPlaceholder(source, version, 'off');
 }
 
 build();
