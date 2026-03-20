@@ -3,8 +3,9 @@
   "version": "0.3.0",
   "description": "Use AutoHotKey to switch language by CapsLock key",
   "description_zh": "用CapsLock键切换输入法的中英文输入，类似于MacOS电脑",
+  "type": "module",
   "scripts": {
-    "build": "build"
+    "build": "node build.js"
   },
   "keywords": [
     "hotkeys"
