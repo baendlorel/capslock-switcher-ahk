@@ -65,6 +65,7 @@ ToggleScriptEnabled(*) {
     SCRIPT_ENABLED := !SCRIPT_ENABLED
     Suspend(SCRIPT_ENABLED ? 0 : 1)
     A_TrayMenu.Rename(previousLabel, GetToggleMenuLabel())
+    ToastGui.BackColor := "212527"
     ShowToast(SCRIPT_ENABLED ? "已开启" : "已关闭")
 }
 
@@ -153,7 +154,7 @@ GetImeMode() {
     }
 
     if (IsChineseConversionMode(conversionMode)) {
-        ToastGui.BackColor := "a30923"
+        ToastGui.BackColor := "da1e3e"
         return "中文"
     } else {
         ToastGui.BackColor := "303030"

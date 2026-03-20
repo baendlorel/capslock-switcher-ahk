@@ -85,8 +85,9 @@ function build() {
   const version = 'v' + JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8')).version;
   const source = path.resolve('capslock-switcher.ahk');
   const exe = path.resolve(`capslock-switcher-${version}.exe`);
+  const icon = path.resolve('app.ico');
   toggleVersionPlaceholder(source, version, 'on');
-  execSync(`"${ahk}" /in "${source}" /out "${exe}"`);
+  execSync(`"${ahk}" /in "${source}" /out "${exe}" /icon "${icon}"`);
   toggleVersionPlaceholder(source, version, 'off');
 }
 
