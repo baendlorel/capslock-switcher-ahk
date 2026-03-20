@@ -7,16 +7,19 @@ SetCapsLockState "AlwaysOff"
 global APP_VERSION := "__APP_VERSION__" ; 版本号会在编译时自动替换
 global SCRIPT_ENABLED := true
 
-global TOAST_HOLD_MS := 640
-global TOAST_FADE_INTERVAL_MS := 20
-global TOAST_FADE_STEP := 20
-global TOAST_RADIUS := 24
-global TOAST_FONT := "Microsoft YaHei UI"
-global TOAST_MAX_ALPHA := 225
+; ## 输入法状态淡出动画相关配置
+global TOAST_HOLD_MS := 640 ; 动画时间，单位毫秒
+global TOAST_FADE_INTERVAL_MS := 20 ; 动画时间间隔，单位毫秒
+global TOAST_FADE_STEP := 20 ; 动画每一步减少的透明度，为0-255之间的整数
+global TOAST_FADE_KEEP_MS := 20 ; 动画开始后保持当前透明度的时间，单位毫秒
+
+global TOAST_RADIUS := 24 ; 圆角半径，单位像素
+global TOAST_FONT := "Microsoft YaHei UI" ; 字体，推荐使用系统字体以保证支持中文和英文，同时保持美观
+global TOAST_MAX_ALPHA := 225 ; 最大透明度，0-255之间的整数，建议不要设置为255以保持一定的磨砂玻璃效果
 global IME_MODE_BACK_COLOR := Map(
     "中文", "fb0931",
     "English", "303030",
-    "未知", "292727",
+    "未知", "386641",
 )
 
 global ToastAlpha := TOAST_MAX_ALPHA ; todo 这里要加入前n秒保持在这里不变的逻辑
@@ -46,7 +49,7 @@ Initialize() {
     A_TrayMenu.Add()
     A_TrayMenu.Add("退出", (*) => ExitApp())
 
-    ShowToast("CapsLock Switcher " APP_VERSION " 启动")
+    ShowToast("CapsLock Switcher " APP_VERSION " 启动", 1600)
 }
 
 ; # 托盘右键菜单相关

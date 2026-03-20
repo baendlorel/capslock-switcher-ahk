@@ -2,6 +2,11 @@
 
 CapsLock Switcher 是一个轻量级的 AutoHotkey 工具，允许你使用 CapsLock 键在中英文输入法之间切换，类似于 macOS 上的行为。消除了使用 Shift 键切换输入模式的不便。
 
+<p align="center">
+   <img src="./yukari-smugshrug.png" width="240" />
+   <p align="center">没有英文版Readme哦</p>
+</p>
+
 ## 功能
 
 - **CapsLock 切换**: 按下 CapsLock 键在中英文输入模式之间切换
