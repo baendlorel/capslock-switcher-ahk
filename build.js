@@ -89,7 +89,7 @@ function ensureBinDir() {
 
 const ahkMap = new Map([
   [undefined, 'capslock-switcher'],
-  ['cpu', 'cpu'],
+  ['cpu', 'cpu-monitor'],
 ]);
 function build() {
   const who = ahkMap.get(process.argv[2]) ?? process.argv[2];
