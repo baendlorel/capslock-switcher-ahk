@@ -11,18 +11,18 @@ global SCRIPT_ENABLED := true
 global TOAST_HOLD_MS := 640 ; 动画时间，单位毫秒
 global TOAST_FADE_INTERVAL_MS := 20 ; 动画时间间隔，单位毫秒
 global TOAST_FADE_STEP := 20 ; 动画每一步减少的透明度，为0-255之间的整数
-global TOAST_FADE_KEEP_MS := 20 ; 动画开始后保持当前透明度的时间，单位毫秒
 
 global TOAST_RADIUS := 24 ; 圆角半径，单位像素
 global TOAST_FONT := "Microsoft YaHei UI" ; 字体，推荐使用系统字体以保证支持中文和英文，同时保持美观
-global TOAST_MAX_ALPHA := 225 ; 最大透明度，0-255之间的整数，建议不要设置为255以保持一定的磨砂玻璃效果
-global IME_MODE_BACK_COLOR := Map(
+global TOAST_START_ALPHA := 225 ; 起始透明度，0-255之间的整数，建议不要设置为255以保持一定的磨砂玻璃效果
+global IME_BACK_COLOR := Map(
     "中文", "fb0931",
-    "English", "303030",
-    "未知", "386641",
+    "English", "0073ff",
+    "未知", "fb5607",
+    "启动", "2f3239"
 )
 
-global ToastAlpha := TOAST_MAX_ALPHA ; todo 这里要加入前n秒保持在这里不变的逻辑
+global ToastAlpha := TOAST_START_ALPHA ; todo 这里要加入前n秒保持在这里不变的逻辑
 global ToastGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20")
 ToastGui.BackColor := "2f3239"
 ToastGui.MarginX := 28
@@ -39,8 +39,8 @@ Initialize() {
     global APP_VERSION
 
     A_TrayMenu.Delete()
-    A_TrayMenu.Add("版本" APP_VERSION, DoNothing)
-    A_TrayMenu.Disable(APP_VERSION)
+    A_TrayMenu.Add("版本 " APP_VERSION, DoNothing)
+    A_TrayMenu.Disable("版本 " APP_VERSION)
     A_TrayMenu.Add("开机启动", ToggleStartup)
     UpdateStartupMenuItem()
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
@@ -49,7 +49,7 @@ Initialize() {
     A_TrayMenu.Add()
     A_TrayMenu.Add("退出", (*) => ExitApp())
 
-    ShowToast("CapsLock Switcher " APP_VERSION " 启动", 1600)
+    ShowToast("CapsLock Switcher 启动", 1600)
 }
 
 ; # 托盘右键菜单相关
@@ -264,7 +264,7 @@ IsChineseConversionMode(conversionMode) {
 }
 
 ShowToast(text, holdMs := TOAST_HOLD_MS) {
-    global ToastGui, ToastText, ToastAlpha, TOAST_HOLD_MS, TOAST_MAX_ALPHA, IME_MODE_BACK_COLOR
+    global ToastGui, ToastText, ToastAlpha, TOAST_HOLD_MS, TOAST_START_ALPHA, IME_BACK_COLOR
 
     if (text = "") {
         text := "未知"
@@ -273,10 +273,14 @@ ShowToast(text, holdMs := TOAST_HOLD_MS) {
     SetTimer FadeToast, 0
     SetTimer StartFade, 0
 
-    ToastAlpha := 255 * TOAST_MAX_ALPHA
+    ToastAlpha := TOAST_START_ALPHA
     ToastText.Value := text
 
-    ToastGui.BackColor := IME_MODE_BACK_COLOR[text] ? IME_MODE_BACK_COLOR[text] : IME_MODE_BACK_COLOR["未知"]
+    if (InStr(text, "启动")) {
+        ToastGui.BackColor := IME_BACK_COLOR.Get("启动")
+    } else {
+        ToastGui.BackColor := IME_BACK_COLOR.Has(text) ? IME_BACK_COLOR.Get(text) : IME_BACK_COLOR.Get("未知")
+    }
     ToastGui.Show("AutoSize Hide")
     ToastGui.GetPos(, , &w, &h)
     x := Floor((A_ScreenWidth - w) / 2)
@@ -284,12 +288,7 @@ ShowToast(text, holdMs := TOAST_HOLD_MS) {
     ToastGui.Show("x" x " y" y " NoActivate")
 
     ApplyRoundedRegion(ToastGui.Hwnd)
-    if (ToastAlpha > 0) {
-        WinSetTransparent ToastAlpha, "ahk_id " ToastGui.Hwnd
-    } else {
-        WinSetTransparent 0, "ahk_id " ToastGui.Hwnd
-
-    }
+    SetAlpha()
 
     SetTimer StartFade, -holdMs
 }
@@ -307,7 +306,19 @@ FadeToast(*) {
         ToastGui.Hide()
         return
     }
-    WinSetTransparent ToastAlpha, "ahk_id " ToastGui.Hwnd
+
+    SetAlpha()
+}
+
+SetAlpha() {
+    global ToastAlpha, ToastGui, TOAST_START_ALPHA
+    if (ToastAlpha >= TOAST_START_ALPHA) {
+        WinSetTransparent TOAST_START_ALPHA, "ahk_id " ToastGui.Hwnd
+    } else if (ToastAlpha > 0) {
+        WinSetTransparent ToastAlpha, "ahk_id " ToastGui.Hwnd
+    } else {
+        WinSetTransparent 0, "ahk_id " ToastGui.Hwnd
+    }
 }
 
 ApplyRoundedRegion(hwnd) {
