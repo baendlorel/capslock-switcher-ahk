@@ -6,6 +6,7 @@ SetCapsLockState "AlwaysOff"
 ; # 配置信息
 global APP_VERSION := "__APP_VERSION__" ; 版本号会在编译时自动替换
 global SCRIPT_ENABLED := true
+global SWITCH_TOAST_ENABLED := true
 
 ; ## 输入法状态淡出动画相关配置
 global TOAST_HOLD_MS := 640 ; 动画时间，单位毫秒
@@ -26,7 +27,7 @@ global TOAST_TITLE_FONT_SIZE := 20
 global TOAST_SUBTITLE_FONT_SIZE := 11
 global IME_BACK_COLOR := Map(
     "中文", "fb0931",
-    "English", "0073ff",
+    "English", "00316d",
     "未知", "fb5607",
     "启动", "2f3239"
 )
@@ -56,6 +57,8 @@ Initialize() {
     A_TrayMenu.Disable("版本 " APP_VERSION)
     A_TrayMenu.Add("开机启动", ToggleStartup)
     UpdateStartupMenuItem()
+    A_TrayMenu.Add("切换时显示提示", ToggleSwitchToast)
+    UpdateSwitchToastMenuItem()
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
     A_TrayMenu.Add()
     A_TrayMenu.Add("关于", About)
@@ -92,6 +95,24 @@ UpdateStartupMenuItem() {
         A_TrayMenu.Check("开机启动")
     } else {
         A_TrayMenu.Uncheck("开机启动")
+    }
+}
+
+ToggleSwitchToast(*) {
+    global SWITCH_TOAST_ENABLED
+
+    SWITCH_TOAST_ENABLED := !SWITCH_TOAST_ENABLED
+    UpdateSwitchToastMenuItem()
+    ShowToast(SWITCH_TOAST_ENABLED ? "切换提示已开启" : "切换提示已关闭")
+}
+
+UpdateSwitchToastMenuItem() {
+    global SWITCH_TOAST_ENABLED
+
+    if (SWITCH_TOAST_ENABLED) {
+        A_TrayMenu.Check("切换时显示提示")
+    } else {
+        A_TrayMenu.Uncheck("切换时显示提示")
     }
 }
 
@@ -150,13 +171,17 @@ GetStartupShortcutPath() {
 
 ; # 真正的检测中英文和切换模式的逻辑
 ToggleIme(*) {
+    global SWITCH_TOAST_ENABLED
+
     if (!IsChineseLayout()) {
         return
     }
 
     SendInput "^{Space}"
     imeMode := ReadImeModeAfterDelay(60)
-    ShowToast(imeMode)
+    if (SWITCH_TOAST_ENABLED) {
+        ShowToast(imeMode)
+    }
 }
 
 ShowImeState(*) {
