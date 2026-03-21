@@ -6,7 +6,6 @@ SetCapsLockState "AlwaysOff"
 ; # 配置信息
 global APP_VERSION := "__APP_VERSION__" ; 版本号会在编译时自动替换
 global SCRIPT_ENABLED := true
-global SWITCH_TOAST_ENABLED := true
 
 ; ## 输入法状态淡出动画相关配置
 global TOAST_HOLD_MS := 640 ; 动画时间，单位毫秒
@@ -14,35 +13,21 @@ global TOAST_FADE_INTERVAL_MS := 20 ; 动画时间间隔，单位毫秒
 global TOAST_FADE_STEP := 20 ; 动画每一步减少的透明度，为0-255之间的整数
 
 global TOAST_RADIUS := 24 ; 圆角半径，单位像素
-global TOAST_FONT := "Microsoft YaHei UI" ; 字体，推荐使用系统字体以保证支持中文和英文，同时保持美观
-global TOAST_START_ALPHA := 225 ; 起始透明度，0-255之间的整数，建议不要设置为255以保持一定的磨砂玻璃效果
-global TOAST_WIDTH := 320
-global TOAST_HEIGHT := 92
-global TOAST_PADDING_X := 24
-global TOAST_PADDING_Y := 14
-global TOAST_X_RATIO := 0.47
-global TOAST_Y_RATIO := 0.46
-global TOAST_STATUS_FONT_SIZE := 26
-global TOAST_TITLE_FONT_SIZE := 20
-global TOAST_SUBTITLE_FONT_SIZE := 11
+global TOAST_FONT := "Microsoft YaHei UI" ; 字体
+global TOAST_START_ALPHA := 215 ; 起始透明度，0-255之间的整数，建议不要设置为255以保持一定的磨砂玻璃效果
 global IME_BACK_COLOR := Map(
-    "中文", "fb0931",
-    "English", "00316d",
+    "中", "ff1f45",
+    "En", "0073ff",
     "未知", "fb5607",
     "启动", "2f3239"
 )
 
 global ToastAlpha := TOAST_START_ALPHA ; todo 这里要加入前n秒保持在这里不变的逻辑
 global ToastGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20")
-ToastGui.BackColor := "2f3239"
-ToastGui.MarginX := 0
-ToastGui.MarginY := 0
-ToastGui.SetFont("s" TOAST_TITLE_FONT_SIZE " cFFFFFF bold", TOAST_FONT)
-global ToastTitle := ToastGui.AddText("x" TOAST_PADDING_X " y" TOAST_PADDING_Y " w" (TOAST_WIDTH - TOAST_PADDING_X * 2) " h" (
-    TOAST_HEIGHT - TOAST_PADDING_Y * 2) " Center +0x200", "")
-ToastGui.SetFont("s" TOAST_SUBTITLE_FONT_SIZE " cFFFFFF", TOAST_FONT)
-global ToastSubtitle := ToastGui.AddText("x" TOAST_PADDING_X " y" TOAST_PADDING_Y " w" (TOAST_WIDTH - TOAST_PADDING_X *
-    2) " h24 Center +0x200 Hidden", "")
+ToastGui.MarginX := 12
+ToastGui.MarginY := 6
+ToastGui.SetFont("s24 cFFFFFF bold", TOAST_FONT)
+global ToastText := ToastGui.AddText("Center w40", "")
 
 Initialize()
 
@@ -57,15 +42,12 @@ Initialize() {
     A_TrayMenu.Disable("版本 " APP_VERSION)
     A_TrayMenu.Add("开机启动", ToggleStartup)
     UpdateStartupMenuItem()
-    A_TrayMenu.Add("切换时显示提示", ToggleSwitchToast)
-    UpdateSwitchToastMenuItem()
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
     A_TrayMenu.Add()
     A_TrayMenu.Add("关于", About)
     A_TrayMenu.Add()
     A_TrayMenu.Add("退出", (*) => ExitApp())
 
-    ShowToast("CapsLock Switcher 启动", 1600)
 }
 
 ; # 托盘右键菜单相关
@@ -95,24 +77,6 @@ UpdateStartupMenuItem() {
         A_TrayMenu.Check("开机启动")
     } else {
         A_TrayMenu.Uncheck("开机启动")
-    }
-}
-
-ToggleSwitchToast(*) {
-    global SWITCH_TOAST_ENABLED
-
-    SWITCH_TOAST_ENABLED := !SWITCH_TOAST_ENABLED
-    UpdateSwitchToastMenuItem()
-    ShowToast(SWITCH_TOAST_ENABLED ? "切换提示已开启" : "切换提示已关闭")
-}
-
-UpdateSwitchToastMenuItem() {
-    global SWITCH_TOAST_ENABLED
-
-    if (SWITCH_TOAST_ENABLED) {
-        A_TrayMenu.Check("切换时显示提示")
-    } else {
-        A_TrayMenu.Uncheck("切换时显示提示")
     }
 }
 
@@ -171,17 +135,13 @@ GetStartupShortcutPath() {
 
 ; # 真正的检测中英文和切换模式的逻辑
 ToggleIme(*) {
-    global SWITCH_TOAST_ENABLED
-
     if (!IsChineseLayout()) {
         return
     }
 
     SendInput "^{Space}"
     imeMode := ReadImeModeAfterDelay(60)
-    if (SWITCH_TOAST_ENABLED) {
-        ShowToast(imeMode)
-    }
+    ShowToast(imeMode)
 }
 
 ShowImeState(*) {
@@ -214,21 +174,18 @@ GetImeMode() {
 
     hwnd := GetImeTargetHwnd()
     if !hwnd {
-        ToastGui.BackColor := "292727"
         return "未知"
     }
 
     conversionMode := GetImeConversionMode(hwnd)
     if (conversionMode == -1) {
-        return "中文"
+        return "中"
     }
 
     if (IsChineseConversionMode(conversionMode)) {
-        ToastGui.BackColor := "da1e3e"
-        return "中文"
+        return "中"
     } else {
-        ToastGui.BackColor := "303030"
-        return "English"
+        return "En"
     }
 
 }
@@ -302,9 +259,7 @@ IsChineseConversionMode(conversionMode) {
 }
 
 ShowToast(text, holdMs := TOAST_HOLD_MS) {
-    global APP_VERSION, ToastGui, ToastTitle, ToastSubtitle, ToastAlpha
-    global TOAST_HOLD_MS, TOAST_START_ALPHA, IME_BACK_COLOR
-    global TOAST_WIDTH, TOAST_HEIGHT, TOAST_PADDING_X, TOAST_PADDING_Y
+    global ToastGui, ToastText, ToastAlpha, TOAST_HOLD_MS, TOAST_START_ALPHA, IME_BACK_COLOR
 
     if (text = "") {
         text := "未知"
@@ -314,54 +269,19 @@ ShowToast(text, holdMs := TOAST_HOLD_MS) {
     SetTimer StartFade, 0
 
     ToastAlpha := TOAST_START_ALPHA
-    if (InStr(text, "启动")) {
-        titleHeight := 34
-        subtitleHeight := 22
-        titleTop := 16
-        subtitleTop := titleTop + titleHeight + 6
+    ToastText.Value := text
 
-        ToastTitle.SetFont("s" TOAST_TITLE_FONT_SIZE " cFFFFFF bold", TOAST_FONT)
-        ToastTitle.Value := "CapsLock Switcher"
-        ToastTitle.Move(TOAST_PADDING_X, titleTop, TOAST_WIDTH - TOAST_PADDING_X * 2, titleHeight)
-        ToastTitle.Visible := true
-
-        ToastSubtitle.Value := APP_VERSION " 启动"
-        ToastSubtitle.Move(TOAST_PADDING_X, subtitleTop, TOAST_WIDTH - TOAST_PADDING_X * 2, subtitleHeight)
-        ToastSubtitle.Visible := true
-    } else {
-        ToastTitle.SetFont("s" TOAST_STATUS_FONT_SIZE " cFFFFFF bold", TOAST_FONT)
-        ToastTitle.Value := text
-        ToastTitle.Move(TOAST_PADDING_X, TOAST_PADDING_Y, TOAST_WIDTH - TOAST_PADDING_X * 2, TOAST_HEIGHT -
-            TOAST_PADDING_Y * 2)
-        ToastTitle.Visible := true
-
-        ToastSubtitle.Value := ""
-        ToastSubtitle.Visible := false
-    }
-
-    if (InStr(text, "启动")) {
-        ToastGui.BackColor := IME_BACK_COLOR.Get("启动")
-    } else {
-        ToastGui.BackColor := IME_BACK_COLOR.Has(text) ? IME_BACK_COLOR.Get(text) : IME_BACK_COLOR.Get("未知")
-    }
-    x := GetToastAxisPosition(A_ScreenWidth, TOAST_WIDTH, TOAST_X_RATIO)
-    y := GetToastAxisPosition(A_ScreenHeight, TOAST_HEIGHT, TOAST_Y_RATIO)
-    ToastGui.Show("x" x " y" y " w" TOAST_WIDTH " h" TOAST_HEIGHT " NoActivate")
+    ToastGui.BackColor := IME_BACK_COLOR.Has(text) ? IME_BACK_COLOR.Get(text) : IME_BACK_COLOR.Get("未知")
+    ToastGui.Show("AutoSize Hide")
+    ToastGui.GetPos(, , &w, &h)
+    x := Floor((A_ScreenWidth - w) / 2)
+    y := Floor((A_ScreenHeight - h) / 2)
+    ToastGui.Show("x" x " y" y " NoActivate Center")
 
     ApplyRoundedRegion(ToastGui.Hwnd)
     SetAlpha()
 
     SetTimer StartFade, -holdMs
-}
-
-GetToastAxisPosition(screenSize, boxSize, ratio) {
-    availableSpace := screenSize - boxSize
-    if (availableSpace < 0) {
-        return 0
-    }
-
-    ratio := Max(0, Min(1, ratio))
-    return Floor(availableSpace * ratio)
 }
 
 StartFade(*) {
