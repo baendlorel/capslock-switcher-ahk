@@ -80,15 +80,23 @@ function toggleVersionPlaceholder(src, version, state) {
   }
 }
 
+const ahkMap = new Map([
+  [undefined, 'capslock-switcher'],
+  ['cpu', 'cpu'],
+]);
 function build() {
+  const who = ahkMap.get(process.argv[2]) ?? process.argv[2];
   const ahk = getAhk();
   const version = 'v' + JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8')).version;
-  const source = path.resolve('capslock-switcher.ahk');
-  const exe = path.resolve(`capslock-switcher-${version}.exe`);
+  const source = path.resolve(who + '.ahk');
+  const exe = path.resolve(`${who}-${version}.exe`);
   const icon = path.resolve('assets', 'app.ico');
-  toggleVersionPlaceholder(source, version, 'on');
-  execSync(`"${ahk}" /in "${source}" /out "${exe}" /icon "${icon}"`);
-  toggleVersionPlaceholder(source, version, 'off');
+  try {
+    toggleVersionPlaceholder(source, version, 'on');
+    execSync(`"${ahk}" /in "${source}" /out "${exe}" /icon "${icon}"`);
+  } finally {
+    toggleVersionPlaceholder(source, version, 'off');
+  }
 }
 
 build();
