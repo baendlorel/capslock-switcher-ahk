@@ -2,6 +2,14 @@
 SetWorkingDir A_ScriptDir
 
 ; ==================== 全局变量 ====================
+global GUI_WIDTH := 360
+global GUI_HEIGHT := 100
+global GUI_CORNER_RADIUS := 15
+global GUI_MARGIN_TOP := 30
+global GUI_MARGIN_RIGHT := 240
+global GUI_SHOW_TRANSPARENCY := 220
+global GUI_FADE_START_TRANSPARENCY := 205
+global GUI_REFRESH_INTERVAL_MS := 1000
 global guiVisible := false
 global myGui := 0
 
@@ -17,24 +25,14 @@ global myGui := 0
 ; ==================== 显示系统监控窗口 ====================
 ShowSystemMonitor() {
     global guiVisible, myGui
+    global GUI_WIDTH, GUI_HEIGHT, GUI_CORNER_RADIUS
+    global GUI_MARGIN_TOP, GUI_MARGIN_RIGHT
+    global GUI_SHOW_TRANSPARENCY, GUI_REFRESH_INTERVAL_MS
 
     if (guiVisible) {
         FadeOutGUI()
-        guiVisible := false
         return
     }
-
-    ; 获取系统指标
-    cpuUsage := GetCPUUsage()
-    cpuTemp := GetCPUTemperature()
-    memUsage := GetMemoryUsage()
-    memInfo := GetMemoryInfo()
-    memUsed := memInfo.Used
-    memTotal := memInfo.Total
-
-    ; 格式化显示文本
-    memUsedGB := Round(memUsed / 1024, 1)
-    memTotalGB := Round(memTotal / 1024, 1)
 
     ; 创建GUI窗口
     myGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20 +Border", "SystemMonitor")
@@ -52,35 +50,59 @@ ShowSystemMonitor() {
     ; CPU 使用率
     myGui.Add("Text", "x20 y15 w160 h22", "🔷 CPU Usage:")
     myGui.SetFont("c00ff88")
-    myGui.Add("Text", "x180 y15 w160 h22 Right", cpuUsage . "%")
+    myGui.Add("Text", "vCpuUsageText x180 y15 w160 h22 Right", "--%")
     myGui.SetFont("cFFFFFF")
 
     ; CPU 温度
     myGui.Add("Text", "x20 y40 w160 h22", "🔷 CPU Temp:")
     myGui.SetFont("cffaa00")
-    myGui.Add("Text", "x180 y40 w160 h22 Right", cpuTemp)
+    myGui.Add("Text", "vCpuTempText x180 y40 w160 h22 Right", "N/A")
     myGui.SetFont("cFFFFFF")
 
     ; Memory 使用率（百分比和数值在一行）
     myGui.Add("Text", "x20 y65 w160 h22", "🔷 Memory:")
     myGui.SetFont("c00ccff")
-    myGui.Add("Text", "x140 y65 w200 h22 Right", memUsage . "% (" . memUsedGB . "/" . memTotalGB . " GB)")
+    myGui.Add("Text", "vMemUsageText x140 y65 w200 h22 Right", "--")
     myGui.SetFont("cFFFFFF")
 
     ; 显示窗口
-    myGui.Show("xCenter yCenter w360 h100 NoActivate")
+    posX := A_ScreenWidth - GUI_WIDTH - GUI_MARGIN_RIGHT
+    posY := GUI_MARGIN_TOP
+    myGui.Show("x" . posX . " y" . posY . " w" . GUI_WIDTH . " h" . GUI_HEIGHT . " NoActivate")
 
     ; 设置透明度
     myGuiHwnd := myGui.Hwnd
-    WinSetTransparent(240, "ahk_id " . myGuiHwnd)
+    WinSetTransparent(GUI_SHOW_TRANSPARENCY, "ahk_id " . myGuiHwnd)
 
     ; 设置圆角窗口 - 使用DllCall
-    SetRoundedWindow(myGuiHwnd, 15, 360, 100)
+    SetRoundedWindow(myGuiHwnd, GUI_CORNER_RADIUS, GUI_WIDTH, GUI_HEIGHT)
 
     guiVisible := true
+    UpdateSystemMonitor()
+    SetTimer(UpdateSystemMonitor, GUI_REFRESH_INTERVAL_MS)
 
     ; 2秒后开始淡出
     ; SetTimer(FadeOutGUI, -2000)
+}
+
+UpdateSystemMonitor() {
+    global guiVisible, myGui
+
+    if (!guiVisible || !myGui) {
+        return
+    }
+
+    cpuUsage := GetCPUUsage()
+    cpuTemp := GetCPUTemperature()
+    memUsage := GetMemoryUsage()
+    memInfo := GetMemoryInfo()
+
+    memUsedGB := Round(memInfo.Used / 1024, 1)
+    memTotalGB := Round(memInfo.Total / 1024, 1)
+
+    myGui["CpuUsageText"].Text := cpuUsage . "%"
+    myGui["CpuTempText"].Text := cpuTemp
+    myGui["MemUsageText"].Text := memUsage . "% (" . memUsedGB . "/" . memTotalGB . " GB)"
 }
 
 ; ==================== 设置圆角窗口 ====================
@@ -107,15 +129,18 @@ SetRoundedWindow(hwnd, radius, width, height) {
 ; ==================== 开始淡出效果 ====================
 FadeOutGUI() {
     global guiVisible, myGui
+    global GUI_FADE_START_TRANSPARENCY
 
     if (!guiVisible) {
         return
     }
 
+    SetTimer(UpdateSystemMonitor, 0)
+
     myGuiHwnd := myGui.Hwnd
 
     ; 渐变淡出效果
-    transparency := 225
+    transparency := GUI_FADE_START_TRANSPARENCY
     loop 24 {
         transparency -= 20
         if (transparency < 0) {
@@ -129,6 +154,7 @@ FadeOutGUI() {
     try {
         myGui.Destroy()
     }
+    myGui := 0
     guiVisible := false
 }
 
@@ -264,8 +290,10 @@ OnExit(ExitHandler)
 
 ExitHandler(*) {
     global myGui, guiVisible
+    SetTimer(UpdateSystemMonitor, 0)
     try {
         myGui.Destroy()
     }
+    myGui := 0
     guiVisible := false
 }
