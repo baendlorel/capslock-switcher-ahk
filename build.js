@@ -97,7 +97,7 @@ function build() {
   const version = 'v' + JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8')).version;
   const source = path.resolve('src', who + '.ahk');
   const exe = path.resolve('bin', `${who}-${version}.exe`);
-  const icon = path.resolve('assets', 'app.ico');
+  const icon = path.resolve('assets', who + '.ico');
   try {
     ensureBinDir();
     toggleVersionPlaceholder(source, version, 'on');

@@ -9,7 +9,7 @@ global myGui := 0
 ; 双击Ctrl显示监控窗口
 ~Ctrl::
 {
-    if (A_PriorHotkey = "~Ctrl" and A_TimeSincePriorHotkey < 400) {
+    if (A_PriorHotkey = "~Ctrl" and A_TimeSincePriorHotkey < 720) {
         ShowSystemMonitor()
     }
 }
@@ -19,6 +19,8 @@ ShowSystemMonitor() {
     global guiVisible, myGui
 
     if (guiVisible) {
+        FadeOutGUI()
+        guiVisible := false
         return
     }
 
@@ -48,37 +50,37 @@ ShowSystemMonitor() {
     ; myGui.Add("Text", "x20 y40 w260 h1 +0x10 c4a4a6a")
 
     ; CPU 使用率
-    myGui.Add("Text", "x20 y20 w160 h22", "🔷 CPU Usage:")
+    myGui.Add("Text", "x20 y15 w160 h22", "🔷 CPU Usage:")
     myGui.SetFont("c00ff88")
-    myGui.Add("Text", "x180 y20 w100 h22 Right", cpuUsage . "%")
+    myGui.Add("Text", "x180 y15 w160 h22 Right", cpuUsage . "%")
     myGui.SetFont("cFFFFFF")
 
     ; CPU 温度
-    myGui.Add("Text", "x20 y45 w160 h22", "🔷 CPU Temp:")
+    myGui.Add("Text", "x20 y40 w160 h22", "🔷 CPU Temp:")
     myGui.SetFont("cffaa00")
-    myGui.Add("Text", "x180 y45 w100 h22 Right", cpuTemp)
+    myGui.Add("Text", "x180 y40 w160 h22 Right", cpuTemp)
     myGui.SetFont("cFFFFFF")
 
     ; Memory 使用率（百分比和数值在一行）
-    myGui.Add("Text", "x20 y70 w160 h22", "🔷 Memory:")
+    myGui.Add("Text", "x20 y65 w160 h22", "🔷 Memory:")
     myGui.SetFont("c00ccff")
-    myGui.Add("Text", "x180 y70 w100 h22 Right", memUsage . "% (" . memUsedGB . "/" . memTotalGB . " GB)")
+    myGui.Add("Text", "x140 y65 w200 h22 Right", memUsage . "% (" . memUsedGB . "/" . memTotalGB . " GB)")
     myGui.SetFont("cFFFFFF")
 
     ; 显示窗口
-    myGui.Show("xCenter yCenter w300 h100 NoActivate")
+    myGui.Show("xCenter yCenter w360 h100 NoActivate")
 
     ; 设置透明度
     myGuiHwnd := myGui.Hwnd
     WinSetTransparent(240, "ahk_id " . myGuiHwnd)
 
     ; 设置圆角窗口 - 使用DllCall
-    SetRoundedWindow(myGuiHwnd, 15, 300, 130)
+    SetRoundedWindow(myGuiHwnd, 15, 360, 100)
 
     guiVisible := true
 
     ; 2秒后开始淡出
-    SetTimer(FadeOutGUI, -2000)
+    ; SetTimer(FadeOutGUI, -2000)
 }
 
 ; ==================== 设置圆角窗口 ====================
@@ -115,7 +117,7 @@ FadeOutGUI() {
     ; 渐变淡出效果
     transparency := 225
     loop 24 {
-        transparency -= 10
+        transparency -= 20
         if (transparency < 0) {
             transparency := 0
         }
