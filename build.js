@@ -80,6 +80,13 @@ function toggleVersionPlaceholder(src, version, state) {
   }
 }
 
+function ensureBinDir() {
+  const binDir = path.resolve('bin');
+  if (!fs.existsSync(binDir)) {
+    fs.mkdirSync(binDir);
+  }
+}
+
 const ahkMap = new Map([
   [undefined, 'capslock-switcher'],
   ['cpu', 'cpu'],
@@ -88,10 +95,11 @@ function build() {
   const who = ahkMap.get(process.argv[2]) ?? process.argv[2];
   const ahk = getAhk();
   const version = 'v' + JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8')).version;
-  const source = path.resolve(who + '.ahk');
-  const exe = path.resolve(`${who}-${version}.exe`);
+  const source = path.resolve('src', who + '.ahk');
+  const exe = path.resolve('bin', `${who}-${version}.exe`);
   const icon = path.resolve('assets', 'app.ico');
   try {
+    ensureBinDir();
     toggleVersionPlaceholder(source, version, 'on');
     execSync(`"${ahk}" /in "${source}" /out "${exe}" /icon "${icon}"`);
   } finally {
