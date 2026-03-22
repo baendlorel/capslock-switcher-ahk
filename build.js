@@ -98,6 +98,7 @@ function build() {
   const source = path.resolve('src', who + '.ahk');
   const exe = path.resolve('bin', `${who}-${version}.exe`);
   const icon = path.resolve('assets', who + '.ico');
+  console.log(`building [${exe}] through [${ahk}] with icon [${icon}]...`);
   try {
     ensureBinDir();
     toggleVersionPlaceholder(source, version, 'on');
