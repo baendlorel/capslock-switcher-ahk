@@ -77,12 +77,16 @@ DoNothing(*) {
 
 About(*) {
     MsgBox(
-        "本程序原理是将CapsLock映射为Ctrl + Space，需要在输入法快捷键设置中把切换中英文的按键改为Ctrl + Space方可生效" .
-        "Shift + CapsLock可显示当前语言状态" .
-        "" .
-        "" .
+        "本程序原理是将CapsLock映射为Ctrl + Space，需要在输入法快捷键设置`n" .
+        "中把切换中英文的按键改为Ctrl + Space方可生效`n`n" .
+        "`n" .
+        "CapsLock：映射为Ctrl + Space，配合输入法快捷键设置实现切换`n" .
+        "Shift + CapsLock：显示当前语言状态`n" .
+        "Alt + CapsLock：切换本程序开关，关闭后CapsLock恢复原功能`n" .
+        "`n" .
+        "`n" .
         "CapsLock Switcher " APP_VERSION "`n" .
-        "基于 AutoHotkey v2 开发的输入法切换工具`n`n" .
+        "基于 AutoHotkey v2 开发的输入法切换程序`n`n" .
         "作者：Kasukabe Tsumugi`n" .
         "项目地址: https://github.com/baendlorel/capslock-switcher-ahk")
 }
@@ -306,6 +310,7 @@ ShowToast(text, holdMs := TOAST_HOLD_MS) {
     ToastGui.BackColor := IME_BACK_COLOR.Has(text) ? IME_BACK_COLOR.Get(text) : IME_BACK_COLOR.Get("未知")
     ToastGui.Show("AutoSize Hide")
     ToastGui.GetPos(, , &w, &h)
+    w := w + 20 ; 稍微增加宽度
     x := Floor((A_ScreenWidth - w) / 2)
     y := Floor((A_ScreenHeight - h) / 2)
     ToastGui.Show("x" x " y" y " NoActivate Center")
