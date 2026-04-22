@@ -1,8 +1,6 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-SetCapsLockState "AlwaysOff"
-
 ; # 配置信息
 global APP_VERSION := "__APP_VERSION__" ; 版本号会在编译时自动替换
 global SCRIPT_ENABLED := true
@@ -18,11 +16,13 @@ global TOAST_START_ALPHA := 215 ; 起始透明度，0-255之间的整数，建�
 global IME_BACK_COLOR := Map(
     "中", "ff1f45",
     "En", "0073ff",
+    "开", "2fbb1c",
+    "关", "941212",
     "未知", "fb5607",
     "启动", "2f3239"
 )
 
-global ToastAlpha := TOAST_START_ALPHA ; todo 这里要加入前n秒保持在这里不变的逻辑
+global ToastAlpha := TOAST_START_ALPHA
 global ToastGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20")
 ToastGui.MarginX := 12
 ToastGui.MarginY := 6
@@ -31,15 +31,23 @@ global ToastText := ToastGui.AddText("Center w40", "")
 
 Initialize()
 
+; Enabled: CapsLock toggles IME, Shift+CapsLock only shows the current IME state.
 CapsLock:: ToggleIme()
 +CapsLock:: ShowImeState()
 
 Initialize() {
     global APP_VERSION
 
+    ApplyScriptEnabledState()
+
     A_TrayMenu.Delete()
     A_TrayMenu.Add("版本 " APP_VERSION, DoNothing)
     A_TrayMenu.Disable("版本 " APP_VERSION)
+
+    INTRO := "按CapsLock切换中英文（要求切换快捷键改为Ctrl+Space）。Shift+CapsLock显示当前语言状态"
+    A_TrayMenu.Add(INTRO, DoNothing)
+    A_TrayMenu.Disable(INTRO)
+
     A_TrayMenu.Add("开机启动", ToggleStartup)
     UpdateStartupMenuItem()
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
@@ -85,10 +93,17 @@ ToggleScriptEnabled(*) {
 
     previousLabel := GetToggleMenuLabel()
     SCRIPT_ENABLED := !SCRIPT_ENABLED
-    Suspend(SCRIPT_ENABLED ? 0 : 1)
+    ApplyScriptEnabledState()
     A_TrayMenu.Rename(previousLabel, GetToggleMenuLabel())
     ToastGui.BackColor := "212527"
-    ShowToast(SCRIPT_ENABLED ? "已开启" : "已关闭")
+    ShowToast(SCRIPT_ENABLED ? "开" : "关")
+}
+
+ApplyScriptEnabledState() {
+    global SCRIPT_ENABLED
+
+    Suspend(SCRIPT_ENABLED ? 0 : 1)
+    SetCapsLockState(SCRIPT_ENABLED ? "AlwaysOff" : "Off")
 }
 
 GetToggleMenuLabel() {
