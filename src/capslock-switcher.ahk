@@ -31,9 +31,25 @@ global ToastText := ToastGui.AddText("Center w40", "")
 
 Initialize()
 
-CapsLock:: ToggleIme()
-+CapsLock:: ShowImeState()  ; Shift + CapsLock shows the current IME state
-!CapsLock:: ToggleScriptEnabled() ; Alt + CapsLock toggles script enabled state
+; When enabled: toggle IME. When disabled: restore native CapsLock behavior.
+CapsLock:: {
+    global SCRIPT_ENABLED
+    if (SCRIPT_ENABLED) {
+        ToggleIme()
+    } else {
+        ; Manually toggle caps lock state since the key is intercepted
+        SetCapsLockState(GetKeyState("CapsLock", "T") ? "Off" : "On")
+    }
+}
+
+; When enabled: show IME state. When disabled: pass through.
++CapsLock:: {
+    global SCRIPT_ENABLED
+    ShowImeState()
+}
+
+; Always active — used to re-enable the script when it is suspended.
+!CapsLock:: ToggleScriptEnabled()
 
 Initialize() {
     global APP_VERSION
@@ -102,7 +118,8 @@ ToggleScriptEnabled(*) {
 ApplyScriptEnabledState() {
     global SCRIPT_ENABLED
 
-    Suspend(SCRIPT_ENABLED ? 0 : 1)
+    ; Do NOT use Suspend — it would also disable !CapsLock, preventing re-enabling.
+    ; CapsLock/+CapsLock handlers check SCRIPT_ENABLED themselves.
     SetCapsLockState(SCRIPT_ENABLED ? "AlwaysOff" : "Off")
 }
 
