@@ -1,6 +1,11 @@
 ; FirstRun — show a startup notice on every launch (5-second mandatory read)
 
+global FIRST_RUN_MARKER := A_ScriptDir "\\capslock-switcher-v" APP_VERSION "-opened.txt"
 CheckFirstRun() {
+    global FIRST_RUN_MARKER
+    if FileExist(FIRST_RUN_MARKER) {
+        return
+    }
     ShowInstruction(5)
 }
 
@@ -48,18 +53,22 @@ ShowInstruction(waitSecs := 5) {
     }
 
     ; Countdown / spacer
-    frGui.MarginY := 20
+    frGui.MarginY := 32 ; 增加底部空间
     frGui.SetFont("s9 c8899aa norm", "Microsoft YaHei UI")
     countdownCtrl := frGui.AddText("xm w420 Center", waitSecs > 0 ? "请阅读，剩余 " waitSecs " 秒..." : "")
 
     ; Close button
-    frGui.MarginY := 10
+    frGui.MarginY := 28 ; 增加按钮下方空间
     frGui.SetFont("s11 cFFFFFF norm", "Microsoft YaHei UI")
     btnClose := frGui.AddButton("xm+150 w120", "关闭")
     btnClose.Enabled := (waitSecs <= 0)
 
     frGui.Show("AutoSize Center")
-    btnClose.OnEvent("Click", (*) => frGui.Destroy())
+    global FIRST_RUN_MARKER
+    btnClose.OnEvent("Click", (*) => (
+        (!FileExist(FIRST_RUN_MARKER) ? FileAppend("", FIRST_RUN_MARKER) : 0),
+        frGui.Destroy()
+    ))
 
     if (waitSecs > 0) {
         remaining := waitSecs
