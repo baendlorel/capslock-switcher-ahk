@@ -70,13 +70,27 @@ function getAhk() {
   return ahk;
 }
 
-function toggleVersionPlaceholder(src, version, state) {
-  if (state === 'on') {
-    const replaced = fs.readFileSync(src, 'utf-8').replace('__APP_VERSION__', version);
-    fs.writeFileSync(src, replaced);
-  } else {
-    const original = fs.readFileSync(src, 'utf-8').replace(version, '__APP_VERSION__');
-    fs.writeFileSync(src, original);
+function getAllAhkFiles(dir) {
+  const results = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...getAllAhkFiles(full));
+    } else if (entry.name.endsWith('.ahk')) {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
+function toggleVersionPlaceholder(pkgDir, version, state) {
+  for (const file of getAllAhkFiles(pkgDir)) {
+    const content = fs.readFileSync(file, 'utf-8');
+    const updated =
+      state === 'on' ? content.replace('__APP_VERSION__', version) : content.replace(version, '__APP_VERSION__');
+    if (content !== updated) {
+      fs.writeFileSync(file, updated);
+    }
   }
 }
 
@@ -95,16 +109,17 @@ function build() {
   const who = ahkMap.get(process.argv[2]) ?? process.argv[2];
   const ahk = getAhk();
   const version = 'v' + JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8')).version;
-  const source = path.resolve('packages', who, who + '.ahk');
+  const pkgDir = path.resolve('packages', who);
+  const source = path.join(pkgDir, who + '.ahk');
   const exe = path.resolve('bin', `${who}-${version}.exe`);
   const icon = path.resolve('assets', who + '.ico');
   console.log(`building [${exe}] through [${ahk}] with icon [${icon}]...`);
   try {
     ensureBinDir();
-    toggleVersionPlaceholder(source, version, 'on');
+    toggleVersionPlaceholder(pkgDir, version, 'on');
     execSync(`"${ahk}" /in "${source}" /out "${exe}" /icon "${icon}"`);
   } finally {
-    toggleVersionPlaceholder(source, version, 'off');
+    toggleVersionPlaceholder(pkgDir, version, 'off');
   }
 }
 

@@ -13,6 +13,7 @@ Initialize() {
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
     A_TrayMenu.Add()
     A_TrayMenu.Add("为什么开了没效果？", About)
+    A_TrayMenu.Add("关于", AboutProgram)
     A_TrayMenu.Add()
     A_TrayMenu.Add("退出", (*) => ExitApp())
 
@@ -24,19 +25,18 @@ DoNothing(*) {
 }
 
 About(*) {
+    ShowInstruction(0)
+}
+
+AboutProgram(*) {
+    global APP_VERSION
     MsgBox(
-        "本程序原理是将CapsLock映射为Ctrl + Space，需要在输入法快捷键设置`n" .
-        "中把切换中英文的按键改为Ctrl + Space方可生效`n`n" .
-        "`n" .
-        "CapsLock：映射为Ctrl + Space，配合输入法快捷键设置实现切换`n" .
-        "Shift + CapsLock：显示当前语言状态`n" .
-        "Alt + CapsLock：切换本程序开关，关闭后CapsLock恢复原功能`n" .
-        "`n" .
-        "`n" .
-        "CapsLock Switcher " APP_VERSION "`n" .
+        "CapsLock Switcher " APP_VERSION "`n`n" .
         "基于 AutoHotkey v2 开发的输入法切换程序`n`n" .
         "作者：Kasukabe Tsumugi`n" .
-        "项目地址: https://github.com/baendlorel/capslock-switcher-ahk")
+        "项目地址：https://github.com/baendlorel/capslock-switcher-ahk",
+        "关于 CapsLock Switcher",
+        "0x40")
 }
 
 ToggleStartup(*) {

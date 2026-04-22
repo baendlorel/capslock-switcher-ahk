@@ -1,12 +1,12 @@
 ﻿#Requires AutoHotkey v2.0
 #SingleInstance Force
 
-#Include lib/config.ahk
-#Include lib/toast.ahk
-#Include lib/ime.ahk
-#Include lib/startup.ahk
-#Include lib/first-run.ahk
-#Include lib/tray.ahk
+#Include ./lib/config.ahk
+#Include ./lib/toast.ahk
+#Include ./lib/ime.ahk
+#Include ./lib/startup.ahk
+#Include ./lib/first-run.ahk
+#Include ./lib/tray.ahk
 
 Initialize()
 
