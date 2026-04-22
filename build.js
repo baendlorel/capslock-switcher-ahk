@@ -95,7 +95,7 @@ function build() {
   const who = ahkMap.get(process.argv[2]) ?? process.argv[2];
   const ahk = getAhk();
   const version = 'v' + JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8')).version;
-  const source = path.resolve('src', who + '.ahk');
+  const source = path.resolve('packages', who, who + '.ahk');
   const exe = path.resolve('bin', `${who}-${version}.exe`);
   const icon = path.resolve('assets', who + '.ico');
   console.log(`building [${exe}] through [${ahk}] with icon [${icon}]...`);
