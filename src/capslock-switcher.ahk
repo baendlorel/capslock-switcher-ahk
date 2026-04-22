@@ -31,9 +31,9 @@ global ToastText := ToastGui.AddText("Center w40", "")
 
 Initialize()
 
-; Enabled: CapsLock toggles IME, Shift+CapsLock only shows the current IME state.
 CapsLock:: ToggleIme()
-+CapsLock:: ShowImeState()
++CapsLock:: ShowImeState()  ; Shift + CapsLock shows the current IME state
+!CapsLock:: ToggleScriptEnabled() ; Alt + CapsLock toggles script enabled state
 
 Initialize() {
     global APP_VERSION
@@ -96,7 +96,6 @@ ToggleScriptEnabled(*) {
     SCRIPT_ENABLED := !SCRIPT_ENABLED
     ApplyScriptEnabledState()
     A_TrayMenu.Rename(previousLabel, GetToggleMenuLabel())
-    ToastGui.BackColor := "212527"
     ShowToast(SCRIPT_ENABLED ? "开" : "关")
 }
 
