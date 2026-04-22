@@ -43,18 +43,15 @@ Initialize() {
     A_TrayMenu.Delete()
     A_TrayMenu.Add("版本 " APP_VERSION, DoNothing)
     A_TrayMenu.Disable("版本 " APP_VERSION)
-
-    INTRO := "按CapsLock切换中英文（要求切换快捷键改为Ctrl+Space）。Shift+CapsLock显示当前语言状态"
-    A_TrayMenu.Add(INTRO, DoNothing)
-    A_TrayMenu.Disable(INTRO)
-
     A_TrayMenu.Add("开机启动", ToggleStartup)
     UpdateStartupMenuItem()
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
     A_TrayMenu.Add()
-    A_TrayMenu.Add("关于", About)
+    A_TrayMenu.Add("为什么开了没效果？", About)
     A_TrayMenu.Add()
     A_TrayMenu.Add("退出", (*) => ExitApp())
+
+    ShowToast("开")
 
 }
 
@@ -64,8 +61,12 @@ DoNothing(*) {
 
 About(*) {
     MsgBox(
+        "本程序原理是将CapsLock映射为Ctrl + Space，需要在输入法快捷键设置中把切换中英文的按键改为Ctrl + Space方可生效" .
+        "Shift + CapsLock可显示当前语言状态" .
+        "" .
+        "" .
         "CapsLock Switcher " APP_VERSION "`n" .
-        "基于 AutoHotkey 开发的输入法切换工具`n`n" .
+        "基于 AutoHotkey v2 开发的输入法切换工具`n`n" .
         "作者：Kasukabe Tsumugi`n" .
         "项目地址: https://github.com/baendlorel/capslock-switcher-ahk")
 }
