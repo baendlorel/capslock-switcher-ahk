@@ -8,7 +8,7 @@ Initialize() {
     A_TrayMenu.Delete()
     A_TrayMenu.Add("版本 " APP_VERSION, DoNothing)
     A_TrayMenu.Disable("版本 " APP_VERSION)
-    A_TrayMenu.Add("开机启动", ToggleStartup)
+    A_TrayMenu.Add(GetStartupMenuLabel(), ToggleStartup)
     UpdateStartupMenuItem()
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
     A_TrayMenu.Add()
@@ -49,11 +49,16 @@ ToggleStartup(*) {
 }
 
 UpdateStartupMenuItem() {
+    menuLabel := GetStartupMenuLabel()
     if (IsStartupEnabled()) {
-        A_TrayMenu.Check("开机启动")
+        A_TrayMenu.Check(menuLabel)
     } else {
-        A_TrayMenu.Uncheck("开机启动")
+        A_TrayMenu.Uncheck(menuLabel)
     }
+}
+
+GetStartupMenuLabel() {
+    return "开机启动（管理员）"
 }
 
 ToggleScriptEnabled(*) {
