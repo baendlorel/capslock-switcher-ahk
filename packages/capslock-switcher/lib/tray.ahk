@@ -8,8 +8,9 @@ Initialize() {
     A_TrayMenu.Delete()
     A_TrayMenu.Add("版本 " APP_VERSION, DoNothing)
     A_TrayMenu.Disable("版本 " APP_VERSION)
-    A_TrayMenu.Add(GetStartupMenuLabel(), ToggleStartup)
-    UpdateStartupMenuItem()
+    A_TrayMenu.Add(GetAdminStartupMenuLabel(), ToggleAdminStartup)
+    A_TrayMenu.Add(GetStandardStartupMenuLabel(), ToggleStandardStartup)
+    UpdateStartupMenuItems()
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
     A_TrayMenu.Add()
     A_TrayMenu.Add("为什么开了没效果？", About)
@@ -39,26 +40,47 @@ AboutProgram(*) {
         "0x40")
 }
 
-ToggleStartup(*) {
-    if (IsStartupEnabled()) {
-        RemoveStartupShortcut()
+ToggleAdminStartup(*) {
+    if (IsAdminStartupEnabled()) {
+        DisableAdminStartup()
     } else {
-        CreateStartupShortcut()
+        EnableAdminStartup()
     }
-    UpdateStartupMenuItem()
+    UpdateStartupMenuItems()
 }
 
-UpdateStartupMenuItem() {
-    menuLabel := GetStartupMenuLabel()
-    if (IsStartupEnabled()) {
-        A_TrayMenu.Check(menuLabel)
+ToggleStandardStartup(*) {
+    if (IsStandardStartupEnabled()) {
+        DisableStandardStartup()
     } else {
-        A_TrayMenu.Uncheck(menuLabel)
+        EnableStandardStartup()
+    }
+    UpdateStartupMenuItems()
+}
+
+UpdateStartupMenuItems() {
+    adminLabel := GetAdminStartupMenuLabel()
+    standardLabel := GetStandardStartupMenuLabel()
+
+    if (IsAdminStartupEnabled()) {
+        A_TrayMenu.Check(adminLabel)
+    } else {
+        A_TrayMenu.Uncheck(adminLabel)
+    }
+
+    if (IsStandardStartupEnabled()) {
+        A_TrayMenu.Check(standardLabel)
+    } else {
+        A_TrayMenu.Uncheck(standardLabel)
     }
 }
 
-GetStartupMenuLabel() {
+GetAdminStartupMenuLabel() {
     return "开机启动（管理员）"
+}
+
+GetStandardStartupMenuLabel() {
+    return "开机启动（普通）"
 }
 
 ToggleScriptEnabled(*) {

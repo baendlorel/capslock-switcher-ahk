@@ -4,6 +4,7 @@
 #Include ./lib/config.ahk
 #Include ./lib/toast.ahk
 #Include ./lib/ime.ahk
+#Include ./lib/startup-admin.ahk
 #Include ./lib/startup.ahk
 #Include ./lib/first-run.ahk
 #Include ./lib/tray.ahk
