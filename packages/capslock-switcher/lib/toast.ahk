@@ -3,10 +3,10 @@
 ; --- GUI setup (runs at include time as part of the auto-execute section) ---
 global ToastAlpha := TOAST_START_ALPHA
 global ToastGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20")
-ToastGui.MarginX := 12
-ToastGui.MarginY := 6
-ToastGui.SetFont("s24 cFFFFFF bold", TOAST_FONT)
-global ToastText := ToastGui.AddText("Center w40", "")
+ToastGui.MarginX := 16
+ToastGui.MarginY := 10
+ToastGui.SetFont("s23 cFFFFFF bold", TOAST_FONT)
+global ToastText := ToastGui.AddText("Center w70", "")
 
 ; --- Functions ---
 
@@ -26,7 +26,6 @@ ShowToast(text, holdMs := TOAST_HOLD_MS) {
     ToastGui.BackColor := IME_BACK_COLOR.Has(text) ? IME_BACK_COLOR.Get(text) : IME_BACK_COLOR.Get("未知")
     ToastGui.Show("AutoSize Hide")
     ToastGui.GetPos(, , &w, &h)
-    w := w + 120 ; slightly wider than AutoSize for breathing room
     x := Floor((A_ScreenWidth - w) / 2)
     y := Floor((A_ScreenHeight - h) / 2)
     ToastGui.Show("x" x " y" y " NoActivate Center")
