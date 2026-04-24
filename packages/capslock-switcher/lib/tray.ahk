@@ -1,4 +1,4 @@
-; Tray — tray menu setup, script enable/disable toggle
+; Tray — tray menu setup and CapsLock mode toggle
 
 Initialize() {
     global APP_VERSION
@@ -11,14 +11,14 @@ Initialize() {
     A_TrayMenu.Add(GetAdminStartupMenuLabel(), ToggleAdminStartup)
     A_TrayMenu.Add(GetStandardStartupMenuLabel(), ToggleStandardStartup)
     UpdateStartupMenuItems()
-    A_TrayMenu.Add(GetToggleMenuLabel(), ToggleScriptEnabled)
+    A_TrayMenu.Add(GetToggleMenuLabel(), ToggleCapsLockMode)
     A_TrayMenu.Add()
     A_TrayMenu.Add("为什么开了没效果？", About)
     A_TrayMenu.Add("关于", AboutProgram)
     A_TrayMenu.Add()
     A_TrayMenu.Add("退出", (*) => ExitApp())
 
-    ShowToast("开")
+    ShowToast("小写")
     CheckFirstRun()
 }
 
@@ -83,24 +83,35 @@ GetStandardStartupMenuLabel() {
     return "开机启动（普通）"
 }
 
-ToggleScriptEnabled(*) {
+ToggleCapsLockMode(*) {
     global SCRIPT_ENABLED
 
     previousLabel := GetToggleMenuLabel()
-    SCRIPT_ENABLED := !SCRIPT_ENABLED
-    ApplyScriptEnabledState()
+    if (SCRIPT_ENABLED) {
+        SCRIPT_ENABLED := false
+        ApplyScriptEnabledState()
+        SetCapsLockState("On")
+    } else {
+        SCRIPT_ENABLED := true
+        ApplyScriptEnabledState()
+    }
+
     A_TrayMenu.Rename(previousLabel, GetToggleMenuLabel())
-    ShowToast(SCRIPT_ENABLED ? "开" : "关")
+    ShowToast(GetCapsLockToastLabel())
 }
 
 ApplyScriptEnabledState() {
     global SCRIPT_ENABLED
-    ; Do NOT use Suspend — it would also disable !CapsLock, preventing re-enabling.
+    ; Do NOT use Suspend — it would also disable !CapsLock, preventing mode switching.
     ; CapsLock/+CapsLock handlers check SCRIPT_ENABLED themselves.
     SetCapsLockState(SCRIPT_ENABLED ? "AlwaysOff" : "Off")
 }
 
 GetToggleMenuLabel() {
     global SCRIPT_ENABLED
-    return SCRIPT_ENABLED ? "暂时关闭" : "开启"
+    return SCRIPT_ENABLED ? "切换到大写" : "切换到小写"
+}
+
+GetCapsLockToastLabel() {
+    return GetKeyState("CapsLock", "T") ? "大写" : "小写"
 }

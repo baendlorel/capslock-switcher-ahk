@@ -15,8 +15,8 @@ global TOAST_START_ALPHA := 215      ; initial alpha (0-255); <255 gives frosted
 global IME_BACK_COLOR := Map(
     "中", "ff1f45",
     "En", "0073ff",
-    "开", "2fbb1c",
-    "关", "941212",
+    "大写", "510068", ; "2fbb1c",
+    "小写", "d746ff", ; "941212",
     "未知", "fb5607",
     "启动", "2f3239"
 )

@@ -42,7 +42,7 @@ ShowInstruction(waitSecs := 5) {
     hotkeyRows := [
         ["CapsLock", "映射为 Ctrl+Space，配合输入法快捷键切换中英文"],
         ["Shift + CapsLock", "显示当前语言状态"],
-        ["Alt + CapsLock", "切换本程序开关，关闭后 CapsLock 恢复原功能"],
+        ["Alt + CapsLock", "切换到原生 CapsLock 大小写，再按一次切回输入法模式"],
     ]
     for row in hotkeyRows {
         frGui.MarginY := 9

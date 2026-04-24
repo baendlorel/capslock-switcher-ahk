@@ -25,5 +25,5 @@ CapsLock:: {
 ; When enabled: show IME state. When disabled: pass through.
 +CapsLock:: ShowImeState()
 
-; Always active — used to re-enable the script when it is disabled.
-!CapsLock:: ToggleScriptEnabled()
+; Always active — toggles between IME mode and native CapsLock mode.
+!CapsLock:: ToggleCapsLockMode()

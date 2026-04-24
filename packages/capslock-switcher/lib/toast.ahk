@@ -26,7 +26,7 @@ ShowToast(text, holdMs := TOAST_HOLD_MS) {
     ToastGui.BackColor := IME_BACK_COLOR.Has(text) ? IME_BACK_COLOR.Get(text) : IME_BACK_COLOR.Get("未知")
     ToastGui.Show("AutoSize Hide")
     ToastGui.GetPos(, , &w, &h)
-    w := w + 20 ; slightly wider than AutoSize for breathing room
+    w := w + 120 ; slightly wider than AutoSize for breathing room
     x := Floor((A_ScreenWidth - w) / 2)
     y := Floor((A_ScreenHeight - h) / 2)
     ToastGui.Show("x" x " y" y " NoActivate Center")
