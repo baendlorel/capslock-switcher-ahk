@@ -4,6 +4,12 @@ IsAdminStartupEnabled() {
     return IsStartupTaskEnabled()
 }
 
+EnsureAdminStartupTaskConfiguration() {
+    if (A_IsAdmin && IsStartupTaskEnabled()) {
+        CreateStartupTask()
+    }
+}
+
 EnableAdminStartup() {
     RemoveLegacyStartupShortcut()
 
@@ -30,7 +36,9 @@ IsStartupTaskEnabled() {
 }
 
 CreateStartupTask() {
-    args := '/Create /TN "' GetStartupTaskName() '" /SC ONLOGON /RL HIGHEST /IT /TR ' .
+    ; Delay logon startup slightly so Explorer can create the notification area first.
+    args := '/Create /TN "' GetStartupTaskName() '" /SC ONLOGON /RL HIGHEST /DELAY ' . GetStartupTaskDelay() .
+    ' /IT /TR ' .
     QuoteForSchtasks(GetStartupTaskRunCommand()) . ' /F'
     exitCode := RunSchtasks(args)
     if (exitCode = 0) {
@@ -90,6 +98,10 @@ GetStartupTaskRunCommand() {
 GetStartupTaskName() {
     scriptBaseName := RegExReplace(A_ScriptName, "\.[^.]+$", "")
     return "CapsLock Switcher - " scriptBaseName
+}
+
+GetStartupTaskDelay() {
+    return "0000:08"
 }
 
 GetSchtasksPath() {

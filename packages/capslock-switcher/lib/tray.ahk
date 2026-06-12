@@ -3,6 +3,7 @@
 Initialize() {
     global APP_VERSION
 
+    EnsureAdminStartupTaskConfiguration()
     ApplyScriptEnabledState()
 
     A_TrayMenu.Delete()
