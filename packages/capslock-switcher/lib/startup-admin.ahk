@@ -31,6 +31,22 @@ DisableAdminStartup() {
     return RemoveStartupTask()
 }
 
+RestartAsAdmin() {
+    restartCommand := GetRestartCommand()
+    try {
+        Run('*RunAs ' restartCommand)
+    } catch {
+        MsgBox(
+            "无法以管理员权限重新启动。`n`n请手动以管理员权限运行本程序后再试。",
+            "CapsLock Switcher",
+            "0x10"
+        )
+        return false
+    }
+
+    ExitApp()
+}
+
 IsStartupTaskEnabled() {
     return RunSchtasks('/Query /TN "' GetStartupTaskName() '"') = 0
 }
@@ -88,6 +104,14 @@ QuoteForSchtasks(command) {
 }
 
 GetStartupTaskRunCommand() {
+    if (A_IsCompiled) {
+        return '"' A_ScriptFullPath '"'
+    }
+
+    return '"' A_AhkPath '" "' A_ScriptFullPath '"'
+}
+
+GetRestartCommand() {
     if (A_IsCompiled) {
         return '"' A_ScriptFullPath '"'
     }

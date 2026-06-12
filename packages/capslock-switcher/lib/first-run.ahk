@@ -1,6 +1,6 @@
 ; FirstRun — show a startup notice on every launch (5-second mandatory read)
 
-global FIRST_RUN_MARKER := A_ScriptDir "\\capslock-switcher-v" APP_VERSION "-opened.txt"
+global FIRST_RUN_MARKER := A_ScriptDir "\\capslock-switcher-" APP_VERSION "-opened.txt"
 CheckFirstRun() {
     global FIRST_RUN_MARKER
     if FileExist(FIRST_RUN_MARKER) {

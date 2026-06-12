@@ -14,6 +14,8 @@ Initialize() {
     UpdateStartupMenuItems()
     A_TrayMenu.Add(GetToggleMenuLabel(), ToggleCapsLockMode)
     A_TrayMenu.Add()
+    A_TrayMenu.Add("重新启动", RestartApp)
+    A_TrayMenu.Add()
     A_TrayMenu.Add("为什么开了没效果？", About)
     A_TrayMenu.Add("关于", AboutProgram)
     A_TrayMenu.Add()
@@ -99,6 +101,10 @@ ToggleCapsLockMode(*) {
 
     A_TrayMenu.Rename(previousLabel, GetToggleMenuLabel())
     ShowToast(GetCapsLockToastLabel())
+}
+
+RestartApp(*) {
+    RestartAsAdmin()
 }
 
 ApplyScriptEnabledState() {
