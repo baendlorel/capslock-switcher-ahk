@@ -1,6 +1,6 @@
 ; Config — global variables and constants
 
-global APP_VERSION := "__APP_VERSION__" ; replaced at build time
+global APP_VERSION := "v0.5.0" ; replaced at build time
 global SCRIPT_ENABLED := true
 
 ; Toast animation

@@ -6,7 +6,7 @@ import path from 'path';
 
 const POSSIBLE_AHK_PATHS = [
   ['Program Files', 'AutoHotkey', 'Compiler', 'Ahk2Exe.exe'],
-  ['Program Files (x86)', 'utoHotkey', 'Compiler', 'Ahk2Exe.exe'],
+  ['Program Files (x86)', 'AutoHotkey', 'Compiler', 'Ahk2Exe.exe'],
 ];
 const POSSIBLE_DISK = [
   'C:',
